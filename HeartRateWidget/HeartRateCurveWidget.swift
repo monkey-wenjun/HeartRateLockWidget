@@ -12,8 +12,10 @@ struct HeartRateCurveEntry: TimelineEntry {
 struct CurveProvider: TimelineProvider {
     func placeholder(in context: Context) -> HeartRateCurveEntry {
         let now = Date()
-        let samples = (0..<60).map { i in
-            (now.addingTimeInterval(Double(i - 60) * 10), 70 + Int(10 * sin(Double(i) / 6)))
+        let samples: [(date: Date, hr: Int)] = (0..<60).map { i in
+            let date = now.addingTimeInterval(Double(i - 60) * 10)
+            let hr = 70 + Int(10 * sin(Double(i) / 6))
+            return (date: date, hr: hr)
         }
         return HeartRateCurveEntry(date: now, samples: samples, currentHeartRate: 75, isConnected: true)
     }
@@ -164,7 +166,11 @@ struct HeartRateCurveWidget: Widget {
     let now = Date()
     HeartRateCurveEntry(
         date: now,
-        samples: (0..<90).map { i in (now.addingTimeInterval(Double(i - 90) * 10), 65 + Int(20 * abs(sin(Double(i) / 9)))) },
+        samples: (0..<90).map { i -> (date: Date, hr: Int) in
+            let date = now.addingTimeInterval(Double(i - 90) * 10)
+            let hr = 65 + Int(20 * abs(sin(Double(i) / 9)))
+            return (date: date, hr: hr)
+        },
         currentHeartRate: 82,
         isConnected: true
     )
