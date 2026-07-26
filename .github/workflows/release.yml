@@ -20,7 +20,7 @@ jobs:
           xcodebuild -project HeartRateLockWidget.xcodeproj \
             -target HeartRateLock \
             -configuration Release \
-            -derivedDataPath DerivedData \
+            BUILD_DIR="${PWD}/build" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO \
@@ -29,7 +29,7 @@ jobs:
       - name: Prepare App for DMG
         run: |
           mkdir -p build/dmg
-          cp -R "DerivedData/Build/Products/Release/不跳就锁.app" build/dmg/
+          cp -R "build/Release/不跳就锁.app" build/dmg/
 
       - name: Create DMG
         run: |
