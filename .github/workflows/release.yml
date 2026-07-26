@@ -1,0 +1,46 @@
+name: Build and Release DMG
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build App
+        run: |
+          xcodebuild -project HeartRateLockWidget.xcodeproj \
+            -target HeartRateLock \
+            -configuration Release \
+            -derivedDataPath DerivedData \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Prepare App for DMG
+        run: |
+          mkdir -p build/dmg
+          cp -R "DerivedData/Build/Products/Release/不跳就锁.app" build/dmg/
+
+      - name: Create DMG
+        run: |
+          hdiutil create \
+            -volname "不跳就锁" \
+            -srcfolder build/dmg \
+            -ov \
+            -format UDZO \
+            "不跳就锁.dmg"
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 不跳就锁.dmg
