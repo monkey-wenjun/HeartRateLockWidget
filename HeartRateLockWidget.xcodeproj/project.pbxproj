@@ -1,0 +1,464 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		277D798E122CC21EA9302B57 /* HeartRateLockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E055743A198F6399CD579 /* HeartRateLockApp.swift */; };
+		38086AAA2116BB0FDB3035E4 /* HeartRateCurveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8CC9F259E381A31BBBAC5 /* HeartRateCurveWidget.swift */; };
+		3C132E44096244EA40057CD9 /* HeartRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF05F980266224463B1637 /* HeartRateWidget.swift */; };
+		5AF63DE9BDA7B40DBBA5B892 /* HeartRateWidget.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = C07231990D5D898C9C3AB854 /* HeartRateWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		627BD3C0B3C5DB1F8ED89C27 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030D1256B55F1D422F9129D2 /* SharedConfig.swift */; };
+		6DCFAF4F32B3069A13C3B1E4 /* HeartRateWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B3FA00ACAD2FD69583ADB0 /* HeartRateWidgetBundle.swift */; };
+		BFA055D1CF98007083BB36D9 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030D1256B55F1D422F9129D2 /* SharedConfig.swift */; };
+		C1E51F3134AE3D49AB7AD66B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E7868B445C9EB2CF95939B4E /* Assets.xcassets */; };
+		C5D5C86B4A995FDE81B5C667 /* BLEHeartRateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C74B39A9EFACF238EF0F4E04 /* BLEHeartRateManager.swift */; };
+		EC774391982B902F0FFD1DA4 /* LockScreenManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28E5B1E5D4070D07BD945870 /* LockScreenManager.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		EA652C3E362EAA4E43E26410 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ECFDBA03E3CD28CB029F35BF /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FD3DC02A97D97965F57A2801;
+			remoteInfo = HeartRateWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		96C304A380DF542F13EA5CC5 /* Embed ExtensionKit Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(EXTENSIONS_FOLDER_PATH)";
+			dstSubfolderSpec = 16;
+			files = (
+				5AF63DE9BDA7B40DBBA5B892 /* HeartRateWidget.appex in Embed ExtensionKit Extensions */,
+			);
+			name = "Embed ExtensionKit Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		00F80B761521FEB33A3C2104 /* HeartRateLock.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeartRateLock.entitlements; sourceTree = "<group>"; };
+		030D1256B55F1D422F9129D2 /* SharedConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedConfig.swift; sourceTree = "<group>"; };
+		0E1E055743A198F6399CD579 /* HeartRateLockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateLockApp.swift; sourceTree = "<group>"; };
+		28E5B1E5D4070D07BD945870 /* LockScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenManager.swift; sourceTree = "<group>"; };
+		3F0C8F8FA6504E62784BDB0D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		4FB25859D2D9B0F52BF29D7A /* HeartRateLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeartRateLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CCEC63359C413C267DF95BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		94B3FA00ACAD2FD69583ADB0 /* HeartRateWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateWidgetBundle.swift; sourceTree = "<group>"; };
+		96B8CC9F259E381A31BBBAC5 /* HeartRateCurveWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateCurveWidget.swift; sourceTree = "<group>"; };
+		ADFF05F980266224463B1637 /* HeartRateWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateWidget.swift; sourceTree = "<group>"; };
+		B0E9CC3E96382F03B7F8140D /* HeartRateWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HeartRateWidget.entitlements; sourceTree = "<group>"; };
+		C07231990D5D898C9C3AB854 /* HeartRateWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.extensionkit-extension"; includeInIndex = 0; path = HeartRateWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C74B39A9EFACF238EF0F4E04 /* BLEHeartRateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BLEHeartRateManager.swift; sourceTree = "<group>"; };
+		E7868B445C9EB2CF95939B4E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		3FB752DE472CCA0FF4468D7E /* HeartRateLock */ = {
+			isa = PBXGroup;
+			children = (
+				E7868B445C9EB2CF95939B4E /* Assets.xcassets */,
+				C74B39A9EFACF238EF0F4E04 /* BLEHeartRateManager.swift */,
+				00F80B761521FEB33A3C2104 /* HeartRateLock.entitlements */,
+				0E1E055743A198F6399CD579 /* HeartRateLockApp.swift */,
+				3F0C8F8FA6504E62784BDB0D /* Info.plist */,
+				28E5B1E5D4070D07BD945870 /* LockScreenManager.swift */,
+			);
+			path = HeartRateLock;
+			sourceTree = "<group>";
+		};
+		725BB0F172BBD9299276ED43 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				4FB25859D2D9B0F52BF29D7A /* HeartRateLock.app */,
+				C07231990D5D898C9C3AB854 /* HeartRateWidget.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7DFE8F2D7CF5371634D22A78 = {
+			isa = PBXGroup;
+			children = (
+				3FB752DE472CCA0FF4468D7E /* HeartRateLock */,
+				BD008BC6EDEE116EEA92F6A1 /* HeartRateLockShared */,
+				AC0DA14BC8573B2EB6125DDF /* HeartRateWidget */,
+				725BB0F172BBD9299276ED43 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AC0DA14BC8573B2EB6125DDF /* HeartRateWidget */ = {
+			isa = PBXGroup;
+			children = (
+				96B8CC9F259E381A31BBBAC5 /* HeartRateCurveWidget.swift */,
+				B0E9CC3E96382F03B7F8140D /* HeartRateWidget.entitlements */,
+				ADFF05F980266224463B1637 /* HeartRateWidget.swift */,
+				94B3FA00ACAD2FD69583ADB0 /* HeartRateWidgetBundle.swift */,
+				8CCEC63359C413C267DF95BE /* Info.plist */,
+			);
+			path = HeartRateWidget;
+			sourceTree = "<group>";
+		};
+		BD008BC6EDEE116EEA92F6A1 /* HeartRateLockShared */ = {
+			isa = PBXGroup;
+			children = (
+				030D1256B55F1D422F9129D2 /* SharedConfig.swift */,
+			);
+			path = HeartRateLockShared;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		877E0D8600D243CC721C8D2D /* HeartRateLock */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B770DA3EA6B7E76AD43BBF27 /* Build configuration list for PBXNativeTarget "HeartRateLock" */;
+			buildPhases = (
+				D0C72533DD90CDE87616A7A6 /* Sources */,
+				2058A2C3EEAE2B3D744C48C7 /* Resources */,
+				96C304A380DF542F13EA5CC5 /* Embed ExtensionKit Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BE3AC5858709A42EE481A432 /* PBXTargetDependency */,
+			);
+			name = HeartRateLock;
+			packageProductDependencies = (
+			);
+			productName = HeartRateLock;
+			productReference = 4FB25859D2D9B0F52BF29D7A /* HeartRateLock.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FD3DC02A97D97965F57A2801 /* HeartRateWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5117ECE4D1B11D1FF3FEDBB /* Build configuration list for PBXNativeTarget "HeartRateWidget" */;
+			buildPhases = (
+				9CDE7B6BFD97DBDF38E62698 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HeartRateWidget;
+			packageProductDependencies = (
+			);
+			productName = HeartRateWidget;
+			productReference = C07231990D5D898C9C3AB854 /* HeartRateWidget.appex */;
+			productType = "com.apple.product-type.extensionkit-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		ECFDBA03E3CD28CB029F35BF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					877E0D8600D243CC721C8D2D = {
+						DevelopmentTeam = VCDMB9S3N2;
+						ProvisioningStyle = Automatic;
+					};
+					FD3DC02A97D97965F57A2801 = {
+						DevelopmentTeam = VCDMB9S3N2;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = BACBA9D79688C615DC156026 /* Build configuration list for PBXProject "HeartRateLockWidget" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 7DFE8F2D7CF5371634D22A78;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 725BB0F172BBD9299276ED43 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				877E0D8600D243CC721C8D2D /* HeartRateLock */,
+				FD3DC02A97D97965F57A2801 /* HeartRateWidget */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		2058A2C3EEAE2B3D744C48C7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C1E51F3134AE3D49AB7AD66B /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9CDE7B6BFD97DBDF38E62698 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38086AAA2116BB0FDB3035E4 /* HeartRateCurveWidget.swift in Sources */,
+				3C132E44096244EA40057CD9 /* HeartRateWidget.swift in Sources */,
+				6DCFAF4F32B3069A13C3B1E4 /* HeartRateWidgetBundle.swift in Sources */,
+				627BD3C0B3C5DB1F8ED89C27 /* SharedConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D0C72533DD90CDE87616A7A6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C5D5C86B4A995FDE81B5C667 /* BLEHeartRateManager.swift in Sources */,
+				277D798E122CC21EA9302B57 /* HeartRateLockApp.swift in Sources */,
+				EC774391982B902F0FFD1DA4 /* LockScreenManager.swift in Sources */,
+				BFA055D1CF98007083BB36D9 /* SharedConfig.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		BE3AC5858709A42EE481A432 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FD3DC02A97D97965F57A2801 /* HeartRateWidget */;
+			targetProxy = EA652C3E362EAA4E43E26410 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		06060E9C448AC988C568FFC3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeartRateLock/HeartRateLock.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HeartRateLock/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.awen.HeartRateLock;
+				PRODUCT_NAME = "不跳就锁";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		30172B26F27ADA049D93F5B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HeartRateLock/HeartRateLock.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HeartRateLock/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.awen.HeartRateLock;
+				PRODUCT_NAME = "不跳就锁";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		426609A769102C7DDB3AC28C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HeartRateWidget/HeartRateWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HeartRateWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.awen.HeartRateLock.widget;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		42BFEFB47CFFAB8051594207 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = VCDMB9S3N2;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		697B5183D86DEA5E616DB80E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = VCDMB9S3N2;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		CED0A0E3FBE33A529AE672F2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HeartRateWidget/HeartRateWidget.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HeartRateWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.awen.HeartRateLock.widget;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A5117ECE4D1B11D1FF3FEDBB /* Build configuration list for PBXNativeTarget "HeartRateWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				426609A769102C7DDB3AC28C /* Debug */,
+				CED0A0E3FBE33A529AE672F2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B770DA3EA6B7E76AD43BBF27 /* Build configuration list for PBXNativeTarget "HeartRateLock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				30172B26F27ADA049D93F5B1 /* Debug */,
+				06060E9C448AC988C568FFC3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BACBA9D79688C615DC156026 /* Build configuration list for PBXProject "HeartRateLockWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				697B5183D86DEA5E616DB80E /* Debug */,
+				42BFEFB47CFFAB8051594207 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = ECFDBA03E3CD28CB029F35BF /* Project object */;
+}
