@@ -10,6 +10,7 @@
 		277D798E122CC21EA9302B57 /* HeartRateLockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E1E055743A198F6399CD579 /* HeartRateLockApp.swift */; };
 		38086AAA2116BB0FDB3035E4 /* HeartRateCurveWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B8CC9F259E381A31BBBAC5 /* HeartRateCurveWidget.swift */; };
 		3C132E44096244EA40057CD9 /* HeartRateWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADFF05F980266224463B1637 /* HeartRateWidget.swift */; };
+		5A2CE6483E29B26780D86630 /* KeepAwakeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC68E75FFC48260D0516AB1 /* KeepAwakeManager.swift */; };
 		5AF63DE9BDA7B40DBBA5B892 /* HeartRateWidget.appex in Embed ExtensionKit Extensions */ = {isa = PBXBuildFile; fileRef = C07231990D5D898C9C3AB854 /* HeartRateWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		627BD3C0B3C5DB1F8ED89C27 /* SharedConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 030D1256B55F1D422F9129D2 /* SharedConfig.swift */; };
 		6DCFAF4F32B3069A13C3B1E4 /* HeartRateWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94B3FA00ACAD2FD69583ADB0 /* HeartRateWidgetBundle.swift */; };
@@ -51,6 +52,7 @@
 		28E5B1E5D4070D07BD945870 /* LockScreenManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenManager.swift; sourceTree = "<group>"; };
 		3F0C8F8FA6504E62784BDB0D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4FB25859D2D9B0F52BF29D7A /* HeartRateLock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HeartRateLock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CC68E75FFC48260D0516AB1 /* KeepAwakeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepAwakeManager.swift; sourceTree = "<group>"; };
 		8CCEC63359C413C267DF95BE /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		94B3FA00ACAD2FD69583ADB0 /* HeartRateWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateWidgetBundle.swift; sourceTree = "<group>"; };
 		96B8CC9F259E381A31BBBAC5 /* HeartRateCurveWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeartRateCurveWidget.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 				00F80B761521FEB33A3C2104 /* HeartRateLock.entitlements */,
 				0E1E055743A198F6399CD579 /* HeartRateLockApp.swift */,
 				3F0C8F8FA6504E62784BDB0D /* Info.plist */,
+				8CC68E75FFC48260D0516AB1 /* KeepAwakeManager.swift */,
 				28E5B1E5D4070D07BD945870 /* LockScreenManager.swift */,
 			);
 			path = HeartRateLock;
@@ -225,6 +228,7 @@
 				B6C2B77CECFF7A06599993B1 /* AlertManager.swift in Sources */,
 				C5D5C86B4A995FDE81B5C667 /* BLEHeartRateManager.swift in Sources */,
 				277D798E122CC21EA9302B57 /* HeartRateLockApp.swift in Sources */,
+				5A2CE6483E29B26780D86630 /* KeepAwakeManager.swift in Sources */,
 				EC774391982B902F0FFD1DA4 /* LockScreenManager.swift in Sources */,
 				BFA055D1CF98007083BB36D9 /* SharedConfig.swift in Sources */,
 			);

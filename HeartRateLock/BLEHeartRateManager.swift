@@ -13,9 +13,9 @@ struct DiscoveredDevice: Identifiable {
 
 /// 负责扫描、绑定并连接 BLE 设备，订阅标准心率特征（0x2A37）
 @MainActor
-// 注意：@preconcurrency 只能放在 import 上，放在协议遵循列表里是 Swift 6 才有的语法，
-// CI 的 Xcode 15.4（Swift 5.10）编译不了。
-final class BLEHeartRateManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, ObservableObject {
+// Swift 6：用 @preconcurrency 标记 CoreBluetooth 协议遵循，允许 MainActor 隔离的
+// 委托方法满足非隔离的协议要求，避免数据竞争警告。
+final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate, ObservableObject {
     static let shared = BLEHeartRateManager()
 
     private var centralManager: CBCentralManager!
