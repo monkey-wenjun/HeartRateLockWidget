@@ -10,8 +10,8 @@ settings:
     SWIFT_VERSION: "6.0"
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: VCDMB9S3N2
-    MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "1"
+    MARKETING_VERSION: "1.0.3"
+    CURRENT_PROJECT_VERSION: "3"
 
 targets:
   HeartRateLock:
@@ -23,6 +23,8 @@ targets:
     info:
       path: HeartRateLock/Info.plist
       properties:
+        CFBundleShortVersionString: "1.0.3"
+        CFBundleVersion: "3"
         CFBundleDisplayName: 不跳就锁
         LSUIElement: true
         NSBluetoothAlwaysUsageDescription: "HeartRateLock 需要蓝牙权限连接心率设备。"
@@ -52,6 +54,8 @@ targets:
     info:
       path: HeartRateWidget/Info.plist
       properties:
+        CFBundleShortVersionString: "1.0.3"
+        CFBundleVersion: "3"
         CFBundleDisplayName: HeartRateWidget
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension

@@ -238,7 +238,13 @@ private struct LockScreenSettingsView: View {
 
 private struct AbnormalAlertSettingsView: View {
     @AppStorage(SharedConfig.Keys.alertEnabled) private var alertEnabled = false
-    @AppStorage(SharedConfig.Keys.alertHeartRateThreshold) private var alertHeartRateThreshold = SharedConfig.Default.alertHeartRateThreshold
+    @AppStorage(SharedConfig.Keys.alertHeartRateLowerThreshold) private var alertHeartRateLowerThreshold = SharedConfig.Default.alertHeartRateLowerThreshold
+    @AppStorage(SharedConfig.Keys.alertHeartRateLowerThresholdEnabled) private var alertHeartRateLowerThresholdEnabled = false
+    @AppStorage(SharedConfig.Keys.alertHeartRateUpperThreshold) private var alertHeartRateUpperThreshold = SharedConfig.Default.alertHeartRateUpperThreshold
+    @AppStorage(SharedConfig.Keys.alertHeartRateUpperThresholdEnabled) private var alertHeartRateUpperThresholdEnabled = true
+    @AppStorage(SharedConfig.Keys.alertSignalThresholdEnabled) private var alertSignalThresholdEnabled = false
+    @AppStorage(SharedConfig.Keys.alertSignalThreshold) private var alertSignalThreshold = SharedConfig.Default.alertSignalThreshold
+    @AppStorage(SharedConfig.Keys.alertMissingHeartRateAsZero) private var alertMissingHeartRateAsZero = true
     @AppStorage(SharedConfig.Keys.alertDurationMinutes) private var alertDurationMinutes = SharedConfig.Default.alertDurationMinutes
     @AppStorage(SharedConfig.Keys.alertNotifyEnabled) private var alertNotifyEnabled = true
     @AppStorage(SharedConfig.Keys.alertRunScriptEnabled) private var alertRunScriptEnabled = false
@@ -261,24 +267,65 @@ private struct AbnormalAlertSettingsView: View {
             Section {
                 Toggle("开启异常报警", isOn: $alertEnabled)
             } footer: {
-                Text("开启后，当心率持续高于设定阈值并达到设定时长时，会按下方选项发送通知或执行脚本。")
+                Text("开启后，当触发条件持续满足设定时长时，会按下方选项发送通知、执行脚本或发送群消息。")
             }
 
             Group {
                 Section {
-                    HStack {
-                        Text("心率阈值")
-                        Spacer()
-                        TextField("", value: $alertHeartRateThreshold, format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 64)
-                            .multilineTextAlignment(.trailing)
-                        Text("BPM")
+                    Toggle("心率低于", isOn: $alertHeartRateLowerThresholdEnabled)
+
+                    if alertHeartRateLowerThresholdEnabled {
+                        HStack {
+                            Spacer()
+                            TextField("", value: $alertHeartRateLowerThreshold, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 64)
+                                .multilineTextAlignment(.trailing)
+                            Text("BPM 时报警")
+                        }
+                        .onChange(of: alertHeartRateLowerThreshold) { _, newValue in
+                            if newValue < 0 { alertHeartRateLowerThreshold = 0 }
+                            else if newValue > 220 { alertHeartRateLowerThreshold = 220 }
+                        }
                     }
-                    .onChange(of: alertHeartRateThreshold) { _, newValue in
-                        if newValue < 60 { alertHeartRateThreshold = 60 }
-                        else if newValue > 220 { alertHeartRateThreshold = 220 }
+
+                    Toggle("心率高于", isOn: $alertHeartRateUpperThresholdEnabled)
+
+                    if alertHeartRateUpperThresholdEnabled {
+                        HStack {
+                            Spacer()
+                            TextField("", value: $alertHeartRateUpperThreshold, format: .number)
+                                .textFieldStyle(.roundedBorder)
+                                .frame(width: 64)
+                                .multilineTextAlignment(.trailing)
+                            Text("BPM 时报警")
+                        }
+                        .onChange(of: alertHeartRateUpperThreshold) { _, newValue in
+                            if newValue < 0 { alertHeartRateUpperThreshold = 0 }
+                            else if newValue > 220 { alertHeartRateUpperThreshold = 220 }
+                        }
                     }
+
+                    Toggle("同时要求信号弱于阈值", isOn: $alertSignalThresholdEnabled)
+
+                    if alertSignalThresholdEnabled {
+                        HStack {
+                            Text("信号阈值")
+                            Slider(
+                                value: Binding(
+                                    get: { Double(alertSignalThreshold) },
+                                    set: { alertSignalThreshold = Int($0) }
+                                ),
+                                in: -90 ... -40,
+                                step: 1
+                            )
+                            Text("\(alertSignalThreshold) dBm")
+                                .monospacedDigit()
+                                .frame(width: 64, alignment: .trailing)
+                        }
+                    }
+
+                    Toggle("心率缺失但信号存活时视为 0 BPM", isOn: $alertMissingHeartRateAsZero)
 
                     HStack {
                         Text("持续")
@@ -295,6 +342,8 @@ private struct AbnormalAlertSettingsView: View {
                     }
                 } header: {
                     Text("触发条件")
+                } footer: {
+                    Text("心率下限/上限条件满足任一即可，若启用信号阈值则需同时满足信号条件，并持续指定时长才会触发报警。")
                 }
 
                 Section {
@@ -324,7 +373,7 @@ private struct AbnormalAlertSettingsView: View {
                         .pickerStyle(.segmented)
                         .labelsHidden()
 
-                        TextField(webhookPlaceholder, text: $alertFeishuWebhookURL)
+                        SecureField(webhookPlaceholder, text: $alertFeishuWebhookURL)
                             .textFieldStyle(.roundedBorder)
 
                         if alertPlatform.wrappedValue != .wecom {
@@ -345,6 +394,10 @@ private struct AbnormalAlertSettingsView: View {
                             Text("可用占位符：{heartRate} 当前心率、{threshold} 阈值、{duration} 持续分钟。留空将使用默认模板。")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
+                        }
+
+                        Button("测试") {
+                            AlertManager.testPlatformMessage()
                         }
                     }
                 } header: {
@@ -414,6 +467,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
 
         // 启动蓝牙扫描
         _ = BLEHeartRateManager.shared
+
+        // 启动后异步检查更新（每天最多一次），失败静默
+        Task.detached {
+            await UpdateChecker.shared.checkForUpdatesIfNeeded()
+        }
     }
 
     // MARK: - UNUserNotificationCenterDelegate
@@ -466,6 +524,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         let aboutItem = NSMenuItem(title: "关于…", action: #selector(openAbout), keyEquivalent: "")
         aboutItem.target = self
         menu.addItem(aboutItem)
+
+        // 检查更新
+        let updateItem = NSMenuItem(title: "检查更新…", action: #selector(checkForUpdates), keyEquivalent: "")
+        updateItem.target = self
+        menu.addItem(updateItem)
 
         menu.addItem(.separator())
 
@@ -581,13 +644,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate, UNUser
         aboutWindow?.makeKeyAndOrderFront(nil)
     }
 
+    @objc private func checkForUpdates() {
+        Task.detached {
+            await UpdateChecker.shared.checkForUpdatesManually()
+        }
+    }
+
     @objc private func quit() {
         NSApplication.shared.terminate(nil)
     }
 }
 
-/// 关于窗口：作者信息
+/// 关于窗口：作者信息 + 版本 + 检查更新
 struct AboutView: View {
+    @State private var isChecking = false
+
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "heart.fill")
@@ -596,6 +667,9 @@ struct AboutView: View {
             Text("不跳就锁")
                 .font(.title2.bold())
             Text("手表心率消失就锁屏")
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text("版本 \(UpdateChecker.shared.currentVersion)")
                 .font(.caption)
                 .foregroundColor(.secondary)
 
@@ -619,6 +693,24 @@ struct AboutView: View {
                 Spacer()
                 Link("hi@awen.me", destination: URL(string: "mailto:hi@awen.me")!)
             }
+
+            Button {
+                guard !isChecking else { return }
+                isChecking = true
+                Task {
+                    await UpdateChecker.shared.checkForUpdatesManually()
+                    isChecking = false
+                }
+            } label: {
+                if isChecking {
+                    ProgressView()
+                        .controlSize(.small)
+                        .frame(width: 14, height: 14)
+                } else {
+                    Text("检查更新")
+                }
+            }
+            .disabled(isChecking)
         }
         .padding(20)
         .frame(width: 280)

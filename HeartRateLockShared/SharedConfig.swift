@@ -29,9 +29,21 @@ public enum SharedConfig {
         public static let keepAwakeEnabled = "settingKeepAwakeEnabled"
         /// 异常报警开关
         public static let alertEnabled = "settingAlertEnabled"
-        /// 异常报警：心率阈值（BPM）
-        public static let alertHeartRateThreshold = "settingAlertHeartRateThreshold"
-        /// 异常报警：持续高于阈值的分钟数
+        /// 异常报警：心率下限阈值（BPM）
+        public static let alertHeartRateLowerThreshold = "settingAlertHeartRateLowerThreshold"
+        /// 异常报警：是否启用心率下限条件
+        public static let alertHeartRateLowerThresholdEnabled = "settingAlertHeartRateLowerThresholdEnabled"
+        /// 异常报警：心率上限阈值（BPM）
+        public static let alertHeartRateUpperThreshold = "settingAlertHeartRateUpperThreshold"
+        /// 异常报警：是否启用心率上限条件
+        public static let alertHeartRateUpperThresholdEnabled = "settingAlertHeartRateUpperThresholdEnabled"
+        /// 异常报警：是否启用信号强度阈值条件
+        public static let alertSignalThresholdEnabled = "settingAlertSignalThresholdEnabled"
+        /// 异常报警：信号强度阈值（dBm）
+        public static let alertSignalThreshold = "settingAlertSignalThreshold"
+        /// 异常报警：心率缺失但信号存活时是否视为 0 BPM
+        public static let alertMissingHeartRateAsZero = "settingAlertMissingHeartRateAsZero"
+        /// 异常报警：持续满足条件的分钟数
         public static let alertDurationMinutes = "settingAlertDurationMinutes"
         /// 异常报警：是否发送系统通知
         public static let alertNotifyEnabled = "settingAlertNotifyEnabled"
@@ -59,9 +71,11 @@ public enum SharedConfig {
         public static let lockRSSIThreshold: Int = -75
         public static let weakSignalLockSeconds: Int = 3
         public static let idleLockSeconds: Int = 10
-        public static let alertHeartRateThreshold: Int = 110
+        public static let alertHeartRateLowerThreshold: Int = 50
+        public static let alertHeartRateUpperThreshold: Int = 110
         public static let alertDurationMinutes: Int = 30
-        public static let alertFeishuMessageTemplate: String = "心率异常：已连续 {duration} 分钟高于 {threshold} BPM，当前 {heartRate} BPM。"
+        public static let alertSignalThreshold: Int = -75
+        public static let alertFeishuMessageTemplate: String = "心率异常：已连续 {duration} 分钟，当前 {heartRate} BPM（阈值 {threshold} BPM）。"
     }
 
     /// 心率历史曲线：只保留最近一段时间的样本
@@ -189,10 +203,58 @@ public enum SharedConfig {
         set { UserDefaults.standard.set(newValue, forKey: Keys.alertEnabled) }
     }
 
-    /// 异常报警：心率阈值（BPM），默认 120
-    public static var alertHeartRateThreshold: Int {
-        get { UserDefaults.standard.object(forKey: Keys.alertHeartRateThreshold) as? Int ?? Default.alertHeartRateThreshold }
-        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateThreshold) }
+    /// 异常报警：心率下限阈值（BPM），默认 50
+    public static var alertHeartRateLowerThreshold: Int {
+        get { UserDefaults.standard.object(forKey: Keys.alertHeartRateLowerThreshold) as? Int ?? Default.alertHeartRateLowerThreshold }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateLowerThreshold) }
+    }
+
+    /// 异常报警：是否启用心率下限条件，默认关闭
+    public static var alertHeartRateLowerThresholdEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertHeartRateLowerThresholdEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateLowerThresholdEnabled) }
+    }
+
+    /// 异常报警：心率上限阈值（BPM）。未设置时兼容旧版 alertHeartRateThreshold，默认 110。
+    public static var alertHeartRateUpperThreshold: Int {
+        get {
+            if let value = UserDefaults.standard.object(forKey: Keys.alertHeartRateUpperThreshold) as? Int {
+                return value
+            }
+            // 兼容旧版单一阈值
+            return UserDefaults.standard.object(forKey: "settingAlertHeartRateThreshold") as? Int ?? Default.alertHeartRateUpperThreshold
+        }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateUpperThreshold) }
+    }
+
+    /// 异常报警：是否启用心率上限条件。未设置时默认开启，以兼容旧版行为。
+    public static var alertHeartRateUpperThresholdEnabled: Bool {
+        get {
+            if let value = UserDefaults.standard.object(forKey: Keys.alertHeartRateUpperThresholdEnabled) as? Bool {
+                return value
+            }
+            // 兼容旧版：只要总开关开着就认为上限条件启用
+            return true
+        }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateUpperThresholdEnabled) }
+    }
+
+    /// 异常报警：是否启用信号强度阈值条件，默认关闭
+    public static var alertSignalThresholdEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertSignalThresholdEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertSignalThresholdEnabled) }
+    }
+
+    /// 异常报警：信号强度阈值（dBm），默认 -75
+    public static var alertSignalThreshold: Int {
+        get { UserDefaults.standard.object(forKey: Keys.alertSignalThreshold) as? Int ?? Default.alertSignalThreshold }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertSignalThreshold) }
+    }
+
+    /// 异常报警：心率缺失但信号存活时是否视为 0 BPM，默认开启
+    public static var alertMissingHeartRateAsZero: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertMissingHeartRateAsZero) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertMissingHeartRateAsZero) }
     }
 
     /// 异常报警：持续高于阈值的分钟数，默认 5

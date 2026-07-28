@@ -22,23 +22,24 @@ enum AlertManager {
     }
 
     /// 触发报警：发送通知、执行脚本、发送群消息
-    static func trigger(heartRate: Int) {
+    static func trigger(heartRate: Int, threshold: Int = SharedConfig.alertHeartRateUpperThreshold) {
         if SharedConfig.alertNotifyEnabled {
-            sendNotification(heartRate: heartRate)
+            sendNotification(heartRate: heartRate, threshold: threshold)
         }
         if SharedConfig.alertRunScriptEnabled {
-            runScript(heartRate: heartRate)
+            runScript(heartRate: heartRate, threshold: threshold)
         }
         if SharedConfig.alertFeishuEnabled {
-            sendPlatformMessage(heartRate: heartRate)
+            sendPlatformMessage(heartRate: heartRate, threshold: threshold)
         }
         SharedConfig.alertLastTriggeredAt = Date()
     }
 
-    private static func sendNotification(heartRate: Int) {
+    private static func sendNotification(heartRate: Int, threshold: Int) {
+        let direction = heartRate < threshold ? "低于" : "高于"
         let content = UNMutableNotificationContent()
         content.title = "心率异常"
-        content.body = "心率已连续 \(SharedConfig.alertDurationMinutes) 分钟高于 \(SharedConfig.alertHeartRateThreshold) BPM，当前 \(heartRate) BPM。"
+        content.body = "心率已连续 \(SharedConfig.alertDurationMinutes) 分钟\(direction) \(threshold) BPM，当前 \(heartRate) BPM。"
         content.sound = .default
 
         let request = UNNotificationRequest(identifier: "heartrate-alert-\(Date().timeIntervalSince1970)", content: content, trigger: nil)
@@ -53,7 +54,7 @@ enum AlertManager {
 
     /// 执行用户配置的脚本，支持 Shell 脚本与 Python 脚本，并传入当前心率。
     /// 环境变量 HEART_RATE 与命令行参数 $1 均为当前 BPM。
-    private static func runScript(heartRate: Int) {
+    private static func runScript(heartRate: Int, threshold: Int) {
         let scriptPath = SharedConfig.alertScriptPath.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !scriptPath.isEmpty else {
             Log.write("未配置脚本路径，跳过执行")
@@ -67,7 +68,7 @@ enum AlertManager {
         let task = Process()
         task.environment = (ProcessInfo.processInfo.environment as? [String: String]) ?? [:]
         task.environment?["HEART_RATE"] = "\(heartRate)"
-        task.environment?["ALERT_THRESHOLD"] = "\(SharedConfig.alertHeartRateThreshold)"
+        task.environment?["ALERT_THRESHOLD"] = "\(threshold)"
         task.environment?["ALERT_DURATION_MINUTES"] = "\(SharedConfig.alertDurationMinutes)"
 
         let lowercased = scriptPath.lowercased()
@@ -88,8 +89,14 @@ enum AlertManager {
         }
     }
 
+    /// 手动测试群消息通道：使用当前平台配置发送一条测试消息。
+    static func testPlatformMessage(heartRate: Int = SharedConfig.alertHeartRateUpperThreshold) {
+        Log.write("正在手动测试群消息通道…")
+        sendPlatformMessage(heartRate: heartRate, threshold: heartRate)
+    }
+
     /// 通过群机器人 Webhook 发送消息，按所选平台处理签名与格式。
-    private static func sendPlatformMessage(heartRate: Int) {
+    private static func sendPlatformMessage(heartRate: Int, threshold: Int = SharedConfig.alertHeartRateUpperThreshold) {
         let webhookURLString = SharedConfig.alertFeishuWebhookURL.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !webhookURLString.isEmpty, let url = URL(string: webhookURLString) else {
             Log.write("群消息 Webhook URL 无效或未配置，跳过发送")
@@ -97,7 +104,7 @@ enum AlertManager {
         }
 
         let platform = SharedConfig.alertPlatform
-        let message = renderPlatformMessage(heartRate: heartRate)
+        let message = renderPlatformMessage(heartRate: heartRate, threshold: threshold)
         let timestamp = String(Int(Date().timeIntervalSince1970))
         let secret = SharedConfig.alertFeishuSecret.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -162,13 +169,13 @@ enum AlertManager {
 
     /// 替换群消息模板中的占位符。
     /// 支持 {heartRate} / {hr}、{threshold}、{duration}
-    private static func renderPlatformMessage(heartRate: Int) -> String {
+    private static func renderPlatformMessage(heartRate: Int, threshold: Int) -> String {
         let template = SharedConfig.alertFeishuMessageTemplate.trimmingCharacters(in: .whitespacesAndNewlines)
         var message = template.isEmpty ? SharedConfig.Default.alertFeishuMessageTemplate : template
         let replacements: [String: String] = [
             "{heartRate}": "\(heartRate)",
             "{hr}": "\(heartRate)",
-            "{threshold}": "\(SharedConfig.alertHeartRateThreshold)",
+            "{threshold}": "\(threshold)",
             "{duration}": "\(SharedConfig.alertDurationMinutes)"
         ]
         for (placeholder, value) in replacements {

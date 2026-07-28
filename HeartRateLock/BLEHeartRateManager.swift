@@ -66,9 +66,9 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
 
     private var timeoutTimer: Timer?
 
-    /// 心率持续高于报警阈值：首次超过阈值的时间
-    private var heartRateExceededAt: Date?
-    /// 当前持续超标区间内是否已经触发过报警（恢复低于阈值后重置）
+    /// 报警触发条件首次全部满足的时间
+    private var alertConditionMetAt: Date?
+    /// 当前持续满足条件区间内是否已经触发过报警（条件不再满足后重置）
     private var didTriggerAlert = false
 
     override private init() {
@@ -105,7 +105,7 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         lastAliveAt = nil
         connectAttemptAt = nil
         didLockForTimeout = false
-        heartRateExceededAt = nil
+        alertConditionMetAt = nil
         didTriggerAlert = false
         KeepAwakeManager.setEnabled(false)
         startScanning()
@@ -198,6 +198,9 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         if let peripheral = activePeripheral, peripheral.state == .connected {
             peripheral.readRSSI()
         }
+
+        // 信号存活时持续评估报警条件（包括心率缺失的情况）
+        checkAbnormalAlert(heartRate: currentHeartRate)
 
         // 未绑定设备不参与锁屏
         guard activePeripheral != nil else { return }
@@ -297,6 +300,8 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         Log.write("连接失败: \(peripheral.name ?? "未知"), error: \(error?.localizedDescription ?? "无")")
         isReceiving = false
         persistConnected(false)
+        alertConditionMetAt = nil
+        didTriggerAlert = false
         retryOrScan()
     }
 
@@ -307,6 +312,8 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         currentRSSI = nil
         weakSignalSeconds = 0
         didLockForWeakSignal = false
+        alertConditionMetAt = nil
+        didTriggerAlert = false
         retryOrScan()
     }
 
@@ -397,6 +404,9 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         lastAliveAt = Date()
         didLockForTimeout = false
 
+        // 信号存活但可能没收到心率，按需评估报警条件
+        checkAbnormalAlert(heartRate: currentHeartRate)
+
         if rssi < SharedConfig.lockRSSIThreshold {
             weakSignalSeconds += 1
             if weakSignalSeconds >= SharedConfig.weakSignalLockSeconds, !didLockForWeakSignal {
@@ -434,37 +444,67 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         checkAbnormalAlert(heartRate: hr)
     }
 
-    /// 异常报警：当心率持续高于设定阈值并达到设定分钟数时，发送通知并执行脚本。
-    private func checkAbnormalAlert(heartRate: Int) {
+    /// 异常报警：当所有启用的触发条件持续满足设定分钟数时，执行报警动作。
+    /// - heartRate: 当前心率；nil 表示未收到心率，若启用“心率缺失视为 0”且信号存活则按 0 处理。
+    private func checkAbnormalAlert(heartRate: Int?) {
         guard SharedConfig.alertEnabled else {
-            heartRateExceededAt = nil
+            alertConditionMetAt = nil
             didTriggerAlert = false
             return
         }
 
-        let threshold = SharedConfig.alertHeartRateThreshold
-        let durationSeconds = TimeInterval(SharedConfig.alertDurationMinutes * 60)
+        let effectiveHeartRate: Int
+        if let hr = heartRate {
+            effectiveHeartRate = hr
+        } else if SharedConfig.alertMissingHeartRateAsZero, isSignalAlive {
+            effectiveHeartRate = 0
+        } else {
+            // 心率缺失且不视为 0，无法评估条件，直接重置
+            alertConditionMetAt = nil
+            didTriggerAlert = false
+            return
+        }
 
-        if heartRate > threshold {
-            if heartRateExceededAt == nil {
-                heartRateExceededAt = Date()
+        let lowerMet = SharedConfig.alertHeartRateLowerThresholdEnabled
+            && effectiveHeartRate < SharedConfig.alertHeartRateLowerThreshold
+        let upperMet = SharedConfig.alertHeartRateUpperThresholdEnabled
+            && effectiveHeartRate > SharedConfig.alertHeartRateUpperThreshold
+        let hrMet = lowerMet || upperMet
+
+        let signalMet = !SharedConfig.alertSignalThresholdEnabled || (currentRSSI ?? 0) < SharedConfig.alertSignalThreshold
+
+        if hrMet && signalMet {
+            if alertConditionMetAt == nil {
+                alertConditionMetAt = Date()
                 didTriggerAlert = false
             }
-            guard let exceededAt = heartRateExceededAt else { return }
-            let elapsed = Date().timeIntervalSince(exceededAt)
+            guard let metAt = alertConditionMetAt else { return }
+            let elapsed = Date().timeIntervalSince(metAt)
+            let durationSeconds = TimeInterval(SharedConfig.alertDurationMinutes * 60)
             if elapsed >= durationSeconds, !didTriggerAlert {
                 didTriggerAlert = true
-                Log.write("心率持续高于 \(threshold) BPM 已达 \(Int(elapsed / 60)) 分钟，触发异常报警")
-                AlertManager.trigger(heartRate: heartRate)
+                let hrDesc = heartRate == nil ? "心率缺失（按 0 计）" : "心率 \(effectiveHeartRate) BPM"
+                let conditionDesc = lowerMet ? "低于下限" : (upperMet ? "高于上限" : "满足阈值")
+                let triggeredThreshold = lowerMet ? SharedConfig.alertHeartRateLowerThreshold : SharedConfig.alertHeartRateUpperThreshold
+                Log.write("\(hrDesc) \(conditionDesc) 且信号 \(currentRSSI ?? 0) dBm，已持续 \(Int(elapsed / 60)) 分钟，触发异常报警")
+                AlertManager.trigger(heartRate: effectiveHeartRate, threshold: triggeredThreshold)
             }
         } else {
-            // 心率恢复阈值以下，重置计时
-            if heartRateExceededAt != nil {
-                Log.write("心率已恢复到 \(threshold) BPM 以下，重置异常报警计时")
+            // 条件不再满足，重置计时
+            if alertConditionMetAt != nil {
+                let reason = !hrMet ? "心率条件不满足" : "信号条件不满足"
+                Log.write("\(reason)，重置异常报警计时")
             }
-            heartRateExceededAt = nil
+            alertConditionMetAt = nil
             didTriggerAlert = false
         }
+    }
+
+    /// 设备是否仍保持连接/存活（用于判断“心率缺失但信号存活”）
+    private var isSignalAlive: Bool {
+        guard activePeripheral != nil else { return false }
+        guard let lastAlive = lastAliveAt else { return false }
+        return Date().timeIntervalSince(lastAlive) <= SharedConfig.timeoutSeconds
     }
 
     /// 标准 Heart Rate Measurement（0x2A37）格式：
