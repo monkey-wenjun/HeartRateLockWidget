@@ -3,7 +3,7 @@
 macOS 状态栏工具 + 桌面小组件：绑定 BLE 心率设备（如华为手表）并订阅心率，心率丢失、设备信号变弱（人走远）或键鼠空闲时自动锁定屏幕；同时可在心率异常时发送通知、执行脚本或发送群消息。
 
 ![image](https://file.awen.me/2026/07/29/clip_1785274748760_7AAB4A1A.png)
-![image](https://file.awen.me/2026/07/28/clip_1785249735449_ABF9EEFC.png)
+![image](https://file.awen.me/2026/07/29/clip_1785274843375_40758CD9.png)
 ![image](https://file.awen.me/2026/07/28/clip_1785249754522_6D0FFB99.png)
 ![image](https://file.awen.me/2026/07/28/clip_1785249774614_EC82D55D.png)
 ![image](https://file.awen.me/2026/07/28/clip_1785249786042_C50D0670.png)
