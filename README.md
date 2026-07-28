@@ -175,3 +175,13 @@ HeartRateLockWidget/
 - WidgetKit 无法常驻扫描蓝牙，心率刷新频率受系统调度限制；**实时性由后台 App 保证**，小组件只是显示层。
 - 锁屏动作由后台 App 执行，不是小组件。
 - 锁屏依赖 `login.framework` 私有接口 `SACLockScreenImmediate`，未来 macOS 版本可能移除，届时自动回退到 `CGSession -suspend` 或 `pmset displaysleepnow`。
+
+## 许可协议
+
+本项目采用 [Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/) 协议授权：
+
+- **允许**：个人学习、研究、修改和再分发；
+- **禁止**：任何商业用途，包括但不限于销售、集成到商业产品、提供付费服务等；
+- **要求**：保留原作者署名。
+
+完整法律文本见项目根目录下的 [`LICENSE`](LICENSE) 文件。如需商业授权，请联系作者。
