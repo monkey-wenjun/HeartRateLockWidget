@@ -1,6 +1,7 @@
 import Foundation
-import CoreBluetooth
+@preconcurrency import CoreBluetooth
 import CoreGraphics
+import WidgetKit
 
 /// 扫描到的 BLE 设备，用于列表展示和用户绑定
 struct DiscoveredDevice: Identifiable {
@@ -12,7 +13,9 @@ struct DiscoveredDevice: Identifiable {
 
 /// 负责扫描、绑定并连接 BLE 设备，订阅标准心率特征（0x2A37）
 @MainActor
-final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDelegate, @preconcurrency CBPeripheralDelegate, ObservableObject {
+// 注意：@preconcurrency 只能放在 import 上，放在协议遵循列表里是 Swift 6 才有的语法，
+// CI 的 Xcode 15.4（Swift 5.10）编译不了。
+final class BLEHeartRateManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate, ObservableObject {
     static let shared = BLEHeartRateManager()
 
     private var centralManager: CBCentralManager!
@@ -58,7 +61,15 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
     /// 是否已因弱信号锁过屏（信号恢复前不重复锁）
     private var didLockForWeakSignal = false
 
+    /// 上一次请求 WidgetKit 刷新小组件的时间（节流用）
+    private var lastWidgetReloadAt: Date = .distantPast
+
     private var timeoutTimer: Timer?
+
+    /// 心率持续高于报警阈值：首次超过阈值的时间
+    private var heartRateExceededAt: Date?
+    /// 当前持续超标区间内是否已经触发过报警（恢复低于阈值后重置）
+    private var didTriggerAlert = false
 
     override private init() {
         super.init()
@@ -94,6 +105,9 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         lastAliveAt = nil
         connectAttemptAt = nil
         didLockForTimeout = false
+        heartRateExceededAt = nil
+        didTriggerAlert = false
+        KeepAwakeManager.setEnabled(false)
         startScanning()
     }
 
@@ -132,13 +146,20 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
             Task { @MainActor [weak self] in
                 self?.checkTimeout()
                 self?.checkIdleLock()
+                self?.updateKeepAwake()
             }
         }
     }
 
-    /// 兜底锁屏：键盘、鼠标全局空闲超过设定秒数就锁，与手表状态无关
+    /// 兜底锁屏：仅在手表失联（超过 timeoutSeconds 无存活信号）时，
+    /// 键盘、鼠标全局空闲超过设定秒数才锁；手表信号正常时键鼠空闲不锁
     private func checkIdleLock() {
         guard SharedConfig.idleLockEnabled, SharedConfig.isIdleLockInSchedule() else {
+            didLockForIdle = false
+            return
+        }
+        // 手表信号正常时不做空闲锁屏
+        if let alive = lastAliveAt, Date().timeIntervalSince(alive) <= SharedConfig.timeoutSeconds {
             didLockForIdle = false
             return
         }
@@ -162,6 +183,14 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         } else {
             didLockForIdle = false
         }
+    }
+
+    /// 保持唤醒：开关开启且手表信号存活（与空闲锁屏同一判定）期间，
+    /// 持有防熄屏断言（等效 caffeinate -d），键鼠再空闲系统也不会自动熄屏锁屏；
+    /// 信号丢失或开关关闭即释放，恢复系统正常休眠
+    private func updateKeepAwake() {
+        let alive = lastAliveAt.map { Date().timeIntervalSince($0) <= SharedConfig.timeoutSeconds } ?? false
+        KeepAwakeManager.setEnabled(SharedConfig.keepAwakeEnabled && alive)
     }
 
     private func checkTimeout() {
@@ -402,6 +431,40 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         didLockForTimeout = false
         persistHeartRate(hr)
         persistConnected(true)
+        checkAbnormalAlert(heartRate: hr)
+    }
+
+    /// 异常报警：当心率持续高于设定阈值并达到设定分钟数时，发送通知并执行脚本。
+    private func checkAbnormalAlert(heartRate: Int) {
+        guard SharedConfig.alertEnabled else {
+            heartRateExceededAt = nil
+            didTriggerAlert = false
+            return
+        }
+
+        let threshold = SharedConfig.alertHeartRateThreshold
+        let durationSeconds = TimeInterval(SharedConfig.alertDurationMinutes * 60)
+
+        if heartRate > threshold {
+            if heartRateExceededAt == nil {
+                heartRateExceededAt = Date()
+                didTriggerAlert = false
+            }
+            guard let exceededAt = heartRateExceededAt else { return }
+            let elapsed = Date().timeIntervalSince(exceededAt)
+            if elapsed >= durationSeconds, !didTriggerAlert {
+                didTriggerAlert = true
+                Log.write("心率持续高于 \(threshold) BPM 已达 \(Int(elapsed / 60)) 分钟，触发异常报警")
+                AlertManager.trigger(heartRate: heartRate)
+            }
+        } else {
+            // 心率恢复阈值以下，重置计时
+            if heartRateExceededAt != nil {
+                Log.write("心率已恢复到 \(threshold) BPM 以下，重置异常报警计时")
+            }
+            heartRateExceededAt = nil
+            didTriggerAlert = false
+        }
     }
 
     /// 标准 Heart Rate Measurement（0x2A37）格式：
@@ -424,6 +487,16 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         SharedStore.set(hr, forKey: SharedConfig.Keys.heartRate)
         SharedStore.set(Date().timeIntervalSince1970, forKey: SharedConfig.Keys.lastUpdated)
         SharedConfig.appendHeartRateSample(hr)
+        reloadWidgets()
+    }
+
+    /// 主动通知 WidgetKit 刷新小组件，让数值尽量接近实时。
+    /// 系统对刷新有调度预算，这里再自带 10 秒节流，避免每秒空转。
+    private func reloadWidgets() {
+        let now = Date()
+        guard now.timeIntervalSince(lastWidgetReloadAt) >= 10 else { return }
+        lastWidgetReloadAt = now
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     private func persistConnected(_ connected: Bool) {

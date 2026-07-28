@@ -25,6 +25,32 @@ public enum SharedConfig {
         public static let idleLockSchedule = "settingIdleLockSchedule"
         public static let weakSignalLockSeconds = "settingWeakSignalLockSeconds"
         public static let launchAtLogin = "settingLaunchAtLogin"
+        /// 手表在线时保持屏幕常亮（防系统空闲熄屏）
+        public static let keepAwakeEnabled = "settingKeepAwakeEnabled"
+        /// 异常报警开关
+        public static let alertEnabled = "settingAlertEnabled"
+        /// 异常报警：心率阈值（BPM）
+        public static let alertHeartRateThreshold = "settingAlertHeartRateThreshold"
+        /// 异常报警：持续高于阈值的分钟数
+        public static let alertDurationMinutes = "settingAlertDurationMinutes"
+        /// 异常报警：是否发送系统通知
+        public static let alertNotifyEnabled = "settingAlertNotifyEnabled"
+        /// 异常报警：是否执行脚本
+        public static let alertRunScriptEnabled = "settingAlertRunScriptEnabled"
+        /// 异常报警：脚本路径（Shell 或 Python）
+        public static let alertScriptPath = "settingAlertScriptPath"
+        /// 异常报警：是否发送到群（原飞书开关，现作为群消息总开关）
+        public static let alertFeishuEnabled = "settingAlertFeishuEnabled"
+        /// 异常报警：群消息平台（feishu / dingtalk / wecom）
+        public static let alertPlatform = "settingAlertPlatform"
+        /// 异常报警：群机器人 Webhook URL
+        public static let alertFeishuWebhookURL = "settingAlertFeishuWebhookURL"
+        /// 异常报警：群机器人密钥（可选，用于飞书/钉钉签名）
+        public static let alertFeishuSecret = "settingAlertFeishuSecret"
+        /// 异常报警：群消息模板
+        public static let alertFeishuMessageTemplate = "settingAlertFeishuMessageTemplate"
+        /// 异常报警：上次触发时间（避免同一持续区间内重复触发）
+        public static let alertLastTriggeredAt = "settingAlertLastTriggeredAt"
     }
 
     /// 设置项的出厂默认值
@@ -33,6 +59,9 @@ public enum SharedConfig {
         public static let lockRSSIThreshold: Int = -75
         public static let weakSignalLockSeconds: Int = 3
         public static let idleLockSeconds: Int = 10
+        public static let alertHeartRateThreshold: Int = 110
+        public static let alertDurationMinutes: Int = 30
+        public static let alertFeishuMessageTemplate: String = "心率异常：已连续 {duration} 分钟高于 {threshold} BPM，当前 {heartRate} BPM。"
     }
 
     /// 心率历史曲线：只保留最近一段时间的样本
@@ -127,6 +156,114 @@ public enum SharedConfig {
     public static var launchAtLogin: Bool {
         get { UserDefaults.standard.object(forKey: Keys.launchAtLogin) as? Bool ?? true }
         set { UserDefaults.standard.set(newValue, forKey: Keys.launchAtLogin) }
+    }
+
+    /// 手表信号在线时保持屏幕常亮（等效 caffeinate -d），默认开启
+    public static var keepAwakeEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.keepAwakeEnabled) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.keepAwakeEnabled) }
+    }
+
+    // MARK: - 异常报警
+
+    /// 支持的群消息平台
+    public enum AlertPlatform: String, CaseIterable, Identifiable, Sendable {
+        case feishu = "feishu"
+        case dingtalk = "dingtalk"
+        case wecom = "wecom"
+
+        public var id: String { rawValue }
+
+        public var displayName: String {
+            switch self {
+            case .feishu: return "飞书"
+            case .dingtalk: return "钉钉"
+            case .wecom: return "企业微信"
+            }
+        }
+    }
+
+    /// 异常报警总开关，默认关闭
+    public static var alertEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertEnabled) }
+    }
+
+    /// 异常报警：心率阈值（BPM），默认 120
+    public static var alertHeartRateThreshold: Int {
+        get { UserDefaults.standard.object(forKey: Keys.alertHeartRateThreshold) as? Int ?? Default.alertHeartRateThreshold }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertHeartRateThreshold) }
+    }
+
+    /// 异常报警：持续高于阈值的分钟数，默认 5
+    public static var alertDurationMinutes: Int {
+        get { UserDefaults.standard.object(forKey: Keys.alertDurationMinutes) as? Int ?? Default.alertDurationMinutes }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertDurationMinutes) }
+    }
+
+    /// 异常报警：是否发送系统通知，默认开启
+    public static var alertNotifyEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertNotifyEnabled) as? Bool ?? true }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertNotifyEnabled) }
+    }
+
+    /// 异常报警：是否执行脚本，默认关闭
+    public static var alertRunScriptEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertRunScriptEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertRunScriptEnabled) }
+    }
+
+    /// 异常报警：脚本路径（Shell 或 Python）
+    public static var alertScriptPath: String {
+        get { UserDefaults.standard.string(forKey: Keys.alertScriptPath) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertScriptPath) }
+    }
+
+    /// 异常报警：是否发送到群，默认关闭
+    public static var alertFeishuEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.alertFeishuEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertFeishuEnabled) }
+    }
+
+    /// 异常报警：群消息平台，兼容旧配置（原飞书用户默认飞书）
+    public static var alertPlatform: AlertPlatform {
+        get {
+            if let raw = UserDefaults.standard.string(forKey: Keys.alertPlatform),
+               let platform = AlertPlatform(rawValue: raw) {
+                return platform
+            }
+            return .feishu
+        }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: Keys.alertPlatform) }
+    }
+
+    /// 异常报警：群机器人 Webhook URL
+    public static var alertFeishuWebhookURL: String {
+        get { UserDefaults.standard.string(forKey: Keys.alertFeishuWebhookURL) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertFeishuWebhookURL) }
+    }
+
+    /// 异常报警：群机器人密钥（可选，用于飞书/钉钉签名）
+    public static var alertFeishuSecret: String {
+        get { UserDefaults.standard.string(forKey: Keys.alertFeishuSecret) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertFeishuSecret) }
+    }
+
+    /// 异常报警：群消息模板，可用占位符 {heartRate}、{threshold}、{duration}
+    public static var alertFeishuMessageTemplate: String {
+        get { UserDefaults.standard.string(forKey: Keys.alertFeishuMessageTemplate) ?? Default.alertFeishuMessageTemplate }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.alertFeishuMessageTemplate) }
+    }
+
+    /// 异常报警：上次触发时间（用于同一持续区间内只触发一次）
+    public static var alertLastTriggeredAt: Date? {
+        get {
+            let timestamp = UserDefaults.standard.double(forKey: Keys.alertLastTriggeredAt)
+            return timestamp > 0 ? Date(timeIntervalSince1970: timestamp) : nil
+        }
+        set {
+            UserDefaults.standard.set(newValue?.timeIntervalSince1970 ?? 0, forKey: Keys.alertLastTriggeredAt)
+        }
     }
 
     // MARK: - 心率历史（App Group 共享，曲线小组件读取）
