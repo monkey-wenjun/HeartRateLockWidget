@@ -441,6 +441,7 @@ final class BLEHeartRateManager: NSObject, @preconcurrency CBCentralManagerDeleg
         didLockForTimeout = false
         persistHeartRate(hr)
         persistConnected(true)
+        HeartRateUploadManager.shared.upload(heartRate: hr, deviceID: boundDeviceName)
         checkAbnormalAlert(heartRate: hr)
     }
 

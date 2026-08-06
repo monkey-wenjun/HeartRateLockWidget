@@ -85,6 +85,8 @@ struct SettingsView: View {
                     LockScreenSettingsView()
                 case .abnormalAlert:
                     AbnormalAlertSettingsView()
+                case .heartRateReport:
+                    HeartRateReportSettingsView()
                 }
             }
             .padding(24)
@@ -98,6 +100,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
     case general
     case lockScreen
     case abnormalAlert
+    case heartRateReport
 
     var id: String { rawValue }
 
@@ -106,6 +109,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return "通用"
         case .lockScreen: return "锁屏"
         case .abnormalAlert: return "异常报警"
+        case .heartRateReport: return "心率上报"
         }
     }
 
@@ -114,6 +118,7 @@ private enum SettingsTab: String, CaseIterable, Identifiable {
         case .general: return "gear"
         case .lockScreen: return "lock.fill"
         case .abnormalAlert: return "exclamationmark.triangle.fill"
+        case .heartRateReport: return "arrow.up.circle.fill"
         }
     }
 }
@@ -432,6 +437,114 @@ private struct AbnormalAlertSettingsView: View {
         case .feishu: return "飞书机器人密钥（可选）"
         case .dingtalk: return "钉钉机器人密钥（可选）"
         case .wecom: return ""
+        }
+    }
+}
+
+// MARK: - 心率上报设置
+
+private struct HeartRateReportSettingsView: View {
+    @AppStorage(SharedConfig.Keys.reportEnabled) private var reportEnabled = false
+    @AppStorage(SharedConfig.Keys.reportAPIURL) private var reportAPIURL = ""
+    @AppStorage(SharedConfig.Keys.reportAPIToken) private var reportAPIToken = ""
+    @AppStorage(SharedConfig.Keys.reportIntervalSeconds) private var reportIntervalSeconds = SharedConfig.Default.reportIntervalSeconds
+    @State private var isTesting = false
+    @State private var testResult: String?
+
+    var body: some View {
+        Form {
+            Section {
+                Toggle("上报心率到 API", isOn: $reportEnabled)
+            } footer: {
+                Text("开启后，蓝牙收到心率时按设定的间隔 POST 到下方 API 地址。关闭后不会发送任何请求。")
+            }
+
+            Group {
+                Section {
+                    HStack {
+                        Text("API 地址")
+                            .frame(width: 80, alignment: .trailing)
+                        TextField("https://example.com/api/v1/heart-rate/realtime", text: $reportAPIURL)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    HStack {
+                        Text("Bearer Token")
+                            .frame(width: 80, alignment: .trailing)
+                        SecureField("", text: $reportAPIToken)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    HStack {
+                        Text("最小上报间隔")
+                            .frame(width: 80, alignment: .trailing)
+                        TextField("1", text: intervalMinutesBinding)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                            .multilineTextAlignment(.trailing)
+                        Text("分钟")
+                    }
+                } header: {
+                    Text("接口配置")
+            } footer: {
+                Text("请求体：{\"heart_rate\": 67, \"timestamp\": 毫秒时间戳, \"device_id\": \"绑定的设备名\", \"source\": \"bluetooth\"}。间隔用于节流，避免心率频繁推送把接口打爆。")
+            }
+
+                Section {
+                    HStack {
+                        Button("发送测试数据") {
+                            sendTest()
+                        }
+                        .disabled(isTesting || !reportEnabled)
+
+                        if isTesting {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else if let testResult {
+                            Text(testResult)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text("测试会立即发送一条心率 67 的样本到接口，用于验证地址与 Token 是否正确。")
+                }
+            }
+            .disabled(!reportEnabled)
+        }
+        .formStyle(.grouped)
+    }
+
+    /// 秒 -> 分钟 的文本绑定，支持手动输入
+    private var intervalMinutesBinding: Binding<String> {
+        Binding(
+            get: { String(max(1, reportIntervalSeconds / 60)) },
+            set: { newValue in
+                let minutes = Int(newValue.filter(\.isNumber)) ?? 1
+                reportIntervalSeconds = max(1, minutes) * 60
+            }
+        )
+    }
+
+    private func sendTest() {
+        guard !isTesting else { return }
+        isTesting = true
+        testResult = nil
+        let sent = HeartRateUploadManager.shared.upload(
+            heartRate: 67,
+            deviceID: UserDefaults.standard.string(forKey: SharedConfig.Keys.boundDeviceName),
+            force: true
+        )
+        if !sent {
+            isTesting = false
+            testResult = "未发送：请检查 API 地址"
+            return
+        }
+        // 请求已在后台发出，稍等片刻后看日志；这里只提示已发起
+        Task {
+            try? await Task.sleep(nanoseconds: 600_000_000)
+            isTesting = false
+            testResult = "已发送，结果见日志（~/Library/Logs/HeartRateLock.log）"
         }
     }
 }

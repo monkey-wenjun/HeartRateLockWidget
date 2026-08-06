@@ -63,6 +63,14 @@ public enum SharedConfig {
         public static let alertFeishuMessageTemplate = "settingAlertFeishuMessageTemplate"
         /// 异常报警：上次触发时间（避免同一持续区间内重复触发）
         public static let alertLastTriggeredAt = "settingAlertLastTriggeredAt"
+        /// 心率上报：总开关
+        public static let reportEnabled = "settingHeartRateReportEnabled"
+        /// 心率上报：API 地址（POST JSON）
+        public static let reportAPIURL = "settingHeartRateReportAPIURL"
+        /// 心率上报：Bearer Token（可选）
+        public static let reportAPIToken = "settingHeartRateReportAPIToken"
+        /// 心率上报：最小上报间隔（秒），避免每秒推送打爆接口
+        public static let reportIntervalSeconds = "settingHeartRateReportIntervalSeconds"
     }
 
     /// 设置项的出厂默认值
@@ -76,6 +84,7 @@ public enum SharedConfig {
         public static let alertDurationMinutes: Int = 30
         public static let alertSignalThreshold: Int = -75
         public static let alertFeishuMessageTemplate: String = "心率异常：已连续 {duration} 分钟，当前 {heartRate} BPM（阈值 {threshold} BPM）。"
+        public static let reportIntervalSeconds: Int = 60
     }
 
     /// 心率历史曲线：只保留最近一段时间的样本
@@ -326,6 +335,32 @@ public enum SharedConfig {
         set {
             UserDefaults.standard.set(newValue?.timeIntervalSince1970 ?? 0, forKey: Keys.alertLastTriggeredAt)
         }
+    }
+
+    // MARK: - 心率上报
+
+    /// 心率上报总开关，默认关闭
+    public static var reportEnabled: Bool {
+        get { UserDefaults.standard.object(forKey: Keys.reportEnabled) as? Bool ?? false }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.reportEnabled) }
+    }
+
+    /// 心率上报 API 地址
+    public static var reportAPIURL: String {
+        get { UserDefaults.standard.string(forKey: Keys.reportAPIURL) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.reportAPIURL) }
+    }
+
+    /// 心率上报 Bearer Token（可选，为空则不携带 Authorization 头）
+    public static var reportAPIToken: String {
+        get { UserDefaults.standard.string(forKey: Keys.reportAPIToken) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.reportAPIToken) }
+    }
+
+    /// 心率上报最小间隔（秒），默认 1 分钟
+    public static var reportIntervalSeconds: Int {
+        get { UserDefaults.standard.object(forKey: Keys.reportIntervalSeconds) as? Int ?? Default.reportIntervalSeconds }
+        set { UserDefaults.standard.set(newValue, forKey: Keys.reportIntervalSeconds) }
     }
 
     // MARK: - 心率历史（App Group 共享，曲线小组件读取）
